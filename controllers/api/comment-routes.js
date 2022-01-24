@@ -20,31 +20,37 @@ router.get("/:id", (req, res) => {
     include: [
       {
         model: Developer,
-        attributes: ["username"]
+        attributes: ["username"],
       },
       {
         model: Post,
-        attributes: ["title"]
+        attributes: ["title"],
+      },
+    ],
+  })
+    .then((dbCommentData) => {
+      if (!dbCommentData) {
+        res.status(400).json({ message: "No comment associated with this id" });
       }
-    ]
-  })
-  .then(dbCommentData => {
-    if (!dbCommentData) {
-      res.status(400).json({message: 'No comment associated with this id'})
-    }
-    res.json(dbCommentData);
-  })
-  .catch(err => {
-    res.status(500).json(err);
-  })
+      res.json(dbCommentData);
+    })
+    .catch((err) => {
+      res.status(500).json(err);
+    });
 });
 
-router.put("/:id", withAuth, (req, res) => {
-  Comment.update(req.body, {
-    where: {
-      id: req.params.id,
+// Make sure to put back the withAuth
+router.put("/:id", (req, res) => {
+  Comment.update(
+    {
+      comment_text: req.body.comment_text
     },
-  })
+    {
+      where: {
+        id: req.params.id,
+      },
+    }
+  )
     .then((dbCommentData) => {
       if (!dbCommentData) {
         res.status(400).json({ message: "No comment with this id to update" });
@@ -56,31 +62,36 @@ router.put("/:id", withAuth, (req, res) => {
     });
 });
 
-router.post("/", withAuth, (req, res) => {
-  Comment.create({
-    comment_text: req.body.comment_text,
-    developer_id: req.session.developer_id,
-    post_id: req.body.post_id,
-  })
-    .then((dbCommentData) => {
-      res.json(dbCommentData);
+router.post("/", (req, res) => {
+  if (req.session) {
+    Comment.create({
+      comment_text: req.body.comment_text,
+      post_id: req.body.post_id,
+      developer_id: req.session.developer_id,
     })
-    .catch((err) => {
-      res.status(500).json(err);
-    });
+      .then((commentData) => {
+        res.json(commentData);
+      })
+      .catch((err) => {
+        res.status(500).json(err);
+      });
+  }
 });
 
-router.delete("/:id", withAuth, (req, res) => {
+router.delete("/:id", (req, res) => {
   Comment.destroy({
     where: {
       id: req.params.id,
     },
   })
-    .then((dbCommentData) => {
-      if (!dbCommentData) {
-        res.json({ message: "No comment found with this id" });
+    .then((commentData) => {
+      if (!commentData) {
+        res
+          .status(404)
+          .json({ message: "no comment has been found with this id" });
+        return;
       }
-      res.json(dbCommentData);
+      res.json(commentData);
     })
     .catch((err) => {
       res.status(500).json(err);

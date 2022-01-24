@@ -5,36 +5,43 @@ const withAuth = require("../utils/auth");
 router.get("/", withAuth, (req, res) => {
   Post.findAll({
     where: {
-      id: req.session.developer_id,
+      // use the ID from the session
+      developer_id: req.session.developer_id,
     },
-    attributes: ["id", "title", "post_text", "created_at"],
+    attributes: [
+      "id",
+      "title",
+      "post_text",
+      "created_at",
+    ],
     include: [
       {
-        model: Developer,
-        attributes: ["username"],
-      },
-      {
         model: Comment,
-        attributes: [
-          "id",
-          "comment_text",
-          "developer_id",
-          "post_id",
-          "created_at",
-        ],
+        attributes: ["id", "comment_text", "post_id", "developer_id", "created_at"],
         include: {
           model: Developer,
           attributes: ["username"],
         },
       },
+      {
+        model: Developer,
+        attributes: ["username"],
+      },
     ],
-  }).then((dbPostdata) => {
-    const posts = dbPostdata.map((post) => post.get({ plain: true }));
-    res.render("dashboard", { posts, loggedIn: true });
-  });
+  })
+    .then((dbPostData) => {
+      // serialize data before passing to template
+      const posts = dbPostData.map((post) => post.get({ plain: true }));
+      res.render("dashboard", { posts, loggedIn: true });
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json(err);
+    });
 });
 
-router.get("/edit/:id", withAuth, (req, res) => {
+
+router.get("/edit/:id", (req, res) => {
   Post.findOne({
     where: {
       id: req.params.id,
@@ -65,6 +72,8 @@ router.get("/edit/:id", withAuth, (req, res) => {
       res.status(400).json({ message: "no post under this id" });
     }
     const post = dbPostData.get({ plain: true });
+
+    console.log('line 69', post);
 
     res.render("edit-post", {
       post,

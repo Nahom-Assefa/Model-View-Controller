@@ -30,7 +30,7 @@ router.get("/", (req, res) => {
       const posts = dbPostData.map((post) => post.get({ plain: true }));
       res.render("homepage", {
         posts,
-        loggedIn: req.session.loggedIn,
+        loggedIn: req.session.loggedIn
       });
     })
     .catch((err) => {
@@ -82,8 +82,8 @@ router.get("/post/:id", (req, res) => {
 
       // serialize the data
       const post = dbPostData.get({ plain: true });
-
-      // console.log('line 97', post);
+      
+      console.log('line 86', post);
 
       //pass data to template
       res.render("single-post", {

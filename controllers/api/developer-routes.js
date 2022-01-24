@@ -42,28 +42,28 @@ router.get("/:id", (req, res) => {
       res.json(dbDeveloperData);
     })
     .catch((err) => {
-      console.log("get one", err);
       res.status(500).json(err);
     });
 });
 
-// POST /api/users
+// POST /api/developers
 router.post("/", (req, res) => {
   Developer.create({
     username: req.body.username,
     email: req.body.email,
     password: req.body.password,
   })
-    .then((dbDeveloperData) => {
-      req.session.save(() => {
+  .then((dbDeveloperData) => {
+    console.log('line 57', dbDeveloperData);
+        req.session.save(() => {
         req.session.developer_id = dbDeveloperData.id;
         req.session.username = dbDeveloperData.username;
         req.session.loggedIn = true;
-
         res.json(dbDeveloperData);
-      });
-    })
+      })
+      })
     .catch((err) => {
+      console.log(err);
       res.status(500).json(err);
     });
 });

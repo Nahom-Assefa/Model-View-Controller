@@ -1,8 +1,10 @@
 async function addPost(event) {
   event.preventDefault();
 
-  const title = document.querySelector('input[name="post-title"]').value;
-  const post_text = document.querySelector('textarea[name="post-text"]').value;
+  const title = document.querySelector('input[name="post-title"]').value.trim();
+  const post_text = document
+    .querySelector('textarea[name="post-text-body"]')
+    .value.trim();
 
   const response = await fetch("/api/posts", {
     method: "POST",
@@ -16,6 +18,7 @@ async function addPost(event) {
   });
 
   if (response.ok) {
+    console.log("this was successful");
     document.location.replace("/dashboard");
   } else {
     alert(response.statusText);

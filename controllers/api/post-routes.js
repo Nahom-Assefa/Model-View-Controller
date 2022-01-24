@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const { Post, Developer, Comment } = require("../../models/associations");
+const { Post, Developer, Comment, Vote } = require("../../models/associations");
 const withAuth = require("../../utils/auth");
 
 router.get("/", (req, res) => {
@@ -21,8 +21,8 @@ router.get("/", (req, res) => {
         ],
         include: {
           model: Developer,
-          attributes: ["username"]
-        }
+          attributes: ["username"],
+        },
       },
     ],
   })
@@ -58,8 +58,8 @@ router.get("/:id", async (req, res) => {
           ],
           include: {
             model: Developer,
-            attributes: ["username"]
-          }
+            attributes: ["username"],
+          },
         },
       ],
     });
@@ -72,7 +72,8 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-router.post("/", withAuth, (req, res) => {
+// make sure to put withAuth back in later and req.session.developer_id
+router.post("/", (req, res) => {
   Post.create({
     title: req.body.title,
     post_text: req.body.post_text,
@@ -87,11 +88,13 @@ router.post("/", withAuth, (req, res) => {
     });
 });
 
-router.put("/:id", withAuth, async (req, res) => {
+// make sure to put withAuth back
+router.put("/:id", async (req, res) => {
   try {
     const response = await Post.update(
       {
         title: req.body.title,
+        post_text: req.body.post_text,
       },
       {
         where: {
@@ -108,22 +111,24 @@ router.put("/:id", withAuth, async (req, res) => {
   }
 });
 
-router.delete("/:id", withAuth, async (req, res) => {
-  try {
-    const response = await Post.destroy({
-      where: {
-        id: req.params.id,
-      },
+// remember to put withAuth back
+router.delete("/:id", withAuth, (req, res) => {
+  Post.destroy({
+    where: {
+      id: req.params.id,
+    },
+  })
+    .then((dbPostData) => {
+      if (!dbPostData) {
+        res.status(404).json({ message: "No post found with this id" });
+        return;
+      }
+      res.json(dbPostData);
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json(err);
     });
-
-    if (!dbPostData) {
-      res.status(400).json({ message: "No post to delete with that id" });
-    }
-
-    res.status(200).json(response);
-  } catch (err) {
-    res.status(500).json(err);
-  }
 });
 
 module.exports = router;

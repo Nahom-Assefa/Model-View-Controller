@@ -1,5 +1,6 @@
 const { Model, DataTypes } = require("sequelize");
 const bcrypt = require("bcrypt");
+const sequelize = require("../config/connection");
 
 class Developer extends Model {
   checkPassword(loginPw) {
@@ -30,7 +31,7 @@ Developer.init(
       type: DataTypes.STRING,
       allowNull: false,
       validate: {
-        len: [6],
+        len: [4],
       },
     },
   },
@@ -39,7 +40,7 @@ Developer.init(
       // set up beforeCreate lifecycle "hook" functionality
       async beforeCreate(newDeveloperData) {
         newDeveloperData.password = await bcrypt.hash(newDeveloperData.password, 10);
-        return newUserData;
+        return newDeveloperData;
       },
       // set up beforeUpdate lifecycle "hook" functionality
       async beforeUpdate(updatedDeveloperData) {
