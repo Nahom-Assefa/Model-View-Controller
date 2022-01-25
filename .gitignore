@@ -1,4 +1,5 @@
 node_modules
-.DB_Store
+.DS_Store
 .env
 package-lock.json
+public/.DS_Store
