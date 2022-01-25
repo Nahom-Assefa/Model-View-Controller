@@ -1,6 +1,6 @@
-const Developer = require("./Developer");
-const Post = require("./Post");
-const Comment = require("./Comment");
+const Developer = require("./developer");
+const Post = require("./post");
+const Comment = require("./comment");
 
 // Create associations
 Developer.hasMany(Post, {
